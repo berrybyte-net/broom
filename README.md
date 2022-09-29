@@ -23,4 +23,4 @@ chmod +x broom_linux_amd64
 
 ## Support
 
-This was hastily made and tested minimally, so please report any issues in the [Issues](https://github.com/berrybyte-net/broom/issues) tab.
+This was hastily made and tested minimally, so please report any issues in the [issues](https://github.com/berrybyte-net/broom/issues) tab and/or reach out to us via Discord.
