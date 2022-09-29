@@ -1,0 +1,53 @@
+name: Build and publish binaries
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    strategy:
+      matrix:
+        goos: [linux, windows, darwin]
+        goarch: [386, amd64, arm64]
+        exclude:
+          - goos: darwin
+            goarch: 386
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '>=1.19'
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          GOEXT: ${{ matrix.goos == 'windows' && '.exe' || '' }}
+          CGO_ENABLED: 0
+        run: |
+          go build -v -ldflags="-s -w" -o build/broom_${GOOS}_${GOARCH}${GOEXT} ./cmd/broom
+      - name: Truncate SHA
+        id: truncate_sha
+        shell: bash
+        run: |
+          echo "::set-output name=truncated_sha::${GITHUB_SHA::7}"
+      - name: Publish a release
+        if: startsWith(github.event.head_commit.message, '[release]')
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: build/broom_${{ matrix.goos }}_${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' || '' }}
+          artifactContentType: application/octet-stream
+          draft: true
+          tag: ${{ steps.truncate_sha.outputs.truncated_sha }}
+          allowUpdates: true
+      - name: Publish an artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: broom_${{ matrix.goos }}_${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' || '' }}
+          path: build/broom_${{ matrix.goos }}_${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' || '' }}
