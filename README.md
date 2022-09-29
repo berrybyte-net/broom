@@ -20,3 +20,7 @@ curl -O https://github.com/berrybyte-net/broom/releases/latest/download/broom_li
 chmod +x broom_linux_amd64
 ./broom_linux_amd64
 ````
+
+## Support
+
+This was hastily made and tested minimally, so please report any issues in the [Issues](https://github.com/berrybyte-net/broom/issues) tab.
