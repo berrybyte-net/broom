@@ -4,32 +4,12 @@ import (
 	"archive/zip"
 	"bufio"
 	"fmt"
+	"github.com/berrybyte-net/broom/service"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
-	"golang.org/x/sys/windows"
-	"golang.org/x/sys/windows/svc/mgr"
-	"io/fs"
 	"os"
 	"path/filepath"
-	"runtime"
-	"strings"
 )
-
-// SystemdSearchPaths are the base directories to search in for service files.
-var SystemdSearchPaths = []string{
-	// TODO: include user unit paths
-	"/etc/systemd/system.control/",
-	"/run/systemd/system.control/",
-	"/run/systemd/transient/",
-	"/run/systemd/generator.early/",
-	"/etc/systemd/system/",
-	"/etc/systemd/system.attached/",
-	"/run/systemd/system/",
-	"/run/systemd/system.attached/",
-	"/run/systemd/generator/",
-	"/usr/lib/systemd/system/",
-	"/run/systemd/generator.late/",
-}
 
 // main is the application entrypoint.
 func main() {
@@ -45,7 +25,6 @@ func main() {
 			},
 		},
 		Action: func(cCtx *cli.Context) error {
-			foundService := false
 			foundInfected := false
 			err := filepath.Walk(filepath.Clean(cCtx.String("dir")), func(path string, info os.FileInfo, err error) error {
 				if err != nil {
@@ -86,44 +65,9 @@ func main() {
 				return err
 			}
 
-			if runtime.GOOS == "windows" {
-				var s *uint16
-				h, err := windows.OpenSCManager(s, nil, windows.SC_MANAGER_ENUMERATE_SERVICE)
-				if err != nil {
-					color.Red("could not query windows services (missing access?)")
-				} else {
-					svcMgr := &mgr.Mgr{Handle: h}
-					services, err := svcMgr.ListServices()
-					if err != nil {
-						color.Red("could not query windows services")
-					} else {
-						for _, svc := range services {
-							if svc == "vmd-gnu" {
-								color.Red("found 'vmd-gnu' service")
-								foundService = true
-							}
-						}
-					}
-				}
-			} else {
-				for _, dir := range SystemdSearchPaths {
-					if info, err := os.Stat(dir); !os.IsNotExist(err) && info.IsDir() {
-						err := filepath.Walk(dir, func(path string, info0 fs.FileInfo, err error) error {
-							if err != nil {
-								return err
-							}
-							if !info0.IsDir() && strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)) == "vmd-gnu" {
-								color.Red("found %s service", path)
-								foundService = true
-							}
-
-							return nil
-						})
-						if err != nil {
-							color.Red("could not query services at path %s", dir)
-						}
-					}
-				}
+			foundService, err := service.GetChecker().HasService("vmd-gnu")
+			if err != nil {
+				color.Red(err.Error())
 			}
 
 			fmt.Print("\n\n\n\n") // a bit of space before the assessment
