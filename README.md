@@ -16,7 +16,7 @@ Invoke the binary through your shell (most likely bash or a derivative).
 
 Example:
 ````bash
-curl -O https://github.com/berrybyte-net/broom/releases/latest/download/broom_linux_amd64
+curl -LO https://github.com/berrybyte-net/broom/releases/latest/download/broom_linux_amd64
 chmod +x broom_linux_amd64
 ./broom_linux_amd64
 ````
