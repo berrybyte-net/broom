@@ -65,9 +65,13 @@ func main() {
 				return err
 			}
 
-			foundService, err := service.GetChecker().HasService("vmd-gnu")
-			if err != nil {
-				color.Red(err.Error())
+			foundService := false
+			checker := service.GetChecker()
+			if checker != nil {
+				foundService, err = checker.HasService("vmd-gnu")
+				if err != nil {
+					color.Red(err.Error())
+				}
 			}
 
 			fmt.Print("\n\n\n\n") // a bit of space before the assessment
