@@ -1,6 +1,10 @@
 # broom
 
-A Go program for scanning JAR files to uncover the 29-09-2022 Minecraft malware infections.
+A Go program for scanning JAR files to uncover [the 29-09-2022 Minecraft malware](https://forums.papermc.io/threads/malware-announcement.529/) infections.
+
+## Disclaimer
+
+This software is by no means a sophisticated antimalware, it only catches one or possibly more variants of the 'Updater' malware; run [OpticFusion1's antimalware](https://github.com/OpticFusion1/MCAntiMalware) for a thorough check.
 
 ## Usage
 
